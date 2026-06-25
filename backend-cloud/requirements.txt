@@ -5,3 +5,4 @@ asyncpg
 python-jose[cryptography]
 python-dotenv
 httpx
+psycopg2-binary
