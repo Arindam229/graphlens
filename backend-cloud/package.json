@@ -1,9 +1,9 @@
 {
-  "name": "graphlens-backend",
+  "name": "graphlens-backend-cloud",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "uvicorn main:app --reload --port 8000",
+    "dev": "uvicorn main:app --reload --port 8001",
     "install:py": "pip install -r requirements.txt"
   }
 }

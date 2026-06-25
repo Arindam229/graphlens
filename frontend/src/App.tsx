@@ -350,52 +350,55 @@ function AnalyzerView({ isDark }: { isDark: boolean }) {
 
       <div className="relative z-10 group mb-6">
         <div className="absolute -inset-px rounded-xl opacity-0 group-focus-within:opacity-100 transition-all duration-500 blur-sm bg-gradient-to-r from-green-500/40 via-cyan-400/20 to-green-500/40" />
-        <div className="relative flex gap-2 rounded-xl border border-border bg-card p-1.5 shadow-sm transition-shadow focus-within:shadow-green-500/10 focus-within:shadow-lg">
-          <div className="relative flex-1">
+        <div className="relative flex items-center p-1.5 rounded-xl border border-border bg-card shadow-sm transition-shadow focus-within:shadow-green-500/10 focus-within:shadow-lg">
+          <div className="flex items-center pl-3 pr-2 pointer-events-none">
             <AnimatePresence mode="wait">
               {isGitHub ? (
-                <motion.span key="gh" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.15 }}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2">
+                <motion.div key="gh" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.15 }}>
                   <Github className="size-4 text-foreground/70" />
-                </motion.span>
+                </motion.div>
               ) : (
-                <motion.span key="local" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.15 }}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2">
+                <motion.div key="local" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.15 }}>
                   <FolderOpen className="size-4 text-muted-foreground" />
-                </motion.span>
+                </motion.div>
               )}
             </AnimatePresence>
-            <input
-              type="text"
-              placeholder="https://github.com/owner/repo or /local/path"
-              className="w-full h-10 pl-10 pr-28 rounded-lg bg-transparent text-foreground text-sm font-mono placeholder:text-muted-foreground/40 focus:outline-none"
-              value={repoPath}
-              onChange={(e) => setRepoPath(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
-            />
-            {inputType && (
-              <AnimatePresence>
-                <motion.span
-                  initial={{ opacity: 0, x: 6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 6 }}
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono font-medium px-1.5 py-0.5 rounded-md border ${
-                    isGitHub
-                      ? 'border-violet-500/30 bg-violet-500/10 text-violet-400'
-                      : 'border-border bg-secondary text-muted-foreground'
-                  }`}
-                >
-                  {isGitHub ? 'GitHub' : 'Local'}
-                </motion.span>
-              </AnimatePresence>
-            )}
           </div>
+          
+          <input
+            type="text"
+            placeholder="https://github.com/owner/repo or /local/path"
+            className="flex-1 min-w-0 bg-transparent border-0 h-11 text-sm font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:ring-0"
+            value={repoPath}
+            onChange={(e) => setRepoPath(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
+          />
+
+          {inputType && (
+            <AnimatePresence>
+              <motion.span
+                initial={{ opacity: 0, x: 6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 6 }}
+                className={`flex-shrink-0 mr-3 text-[10px] font-mono font-medium px-2 py-1 rounded-md border ${
+                  isGitHub
+                    ? 'border-violet-500/30 bg-violet-500/10 text-violet-400'
+                    : 'border-border bg-secondary text-muted-foreground'
+                }`}
+              >
+                {isGitHub ? 'GitHub' : 'Local'}
+              </motion.span>
+            </AnimatePresence>
+          )}
+
           <button
             onClick={handleAnalyze}
             disabled={!repoPath || analyzing}
-            className="flex items-center gap-2 px-5 h-10 rounded-lg bg-green-500 hover:bg-green-400 active:scale-[0.98] text-black text-sm font-semibold transition-all duration-150 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+            className="flex-shrink-0 flex items-center gap-2 px-6 h-11 rounded-lg bg-green-500 hover:bg-green-400 active:scale-[0.98] text-black text-sm font-semibold transition-all duration-150 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
           >
-            {analyzing
-              ? <><span className="size-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />Analyzing…</>
-              : <><Zap className="size-4" />Analyze</>}
+            {analyzing ? (
+              <><span className="size-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />Analyzing…</>
+            ) : (
+              <><Zap className="size-4" />Analyze</>
+            )}
           </button>
         </div>
       </div>

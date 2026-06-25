@@ -5,7 +5,8 @@
   "packageManager": "npm@11.12.1",
   "workspaces": [
     "frontend",
-    "backend"
+    "backend-local",
+    "backend-cloud"
   ],
   "scripts": {
     "dev": "turbo run dev --ui=tui",

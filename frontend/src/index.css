@@ -1,0 +1,102 @@
+@import "tw-animate-css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: oklch(0.09 0.012 255);
+    --foreground: oklch(0.97 0.004 255);
+
+    --card: oklch(0.12 0.012 255);
+    --card-foreground: oklch(0.97 0.004 255);
+
+    --popover: oklch(0.12 0.012 255);
+    --popover-foreground: oklch(0.97 0.004 255);
+
+    --primary: oklch(0.723 0.19 145);
+    --primary-foreground: oklch(0.09 0.012 255);
+
+    --secondary: oklch(0.16 0.012 255);
+    --secondary-foreground: oklch(0.97 0.004 255);
+
+    --muted: oklch(0.16 0.012 255);
+    --muted-foreground: oklch(0.55 0.01 255);
+
+    --accent: oklch(0.20 0.012 255);
+    --accent-foreground: oklch(0.97 0.004 255);
+
+    --destructive: oklch(0.628 0.258 25);
+    --destructive-foreground: oklch(0.97 0.004 255);
+
+    --border: oklch(0.24 0.012 255);
+    --input: oklch(0.16 0.012 255);
+    --ring: oklch(0.723 0.19 145);
+
+    --radius: 0.625rem;
+
+    --chart-1: oklch(0.723 0.19 145);
+    --chart-2: oklch(0.6 0.15 200);
+    --chart-3: oklch(0.65 0.18 270);
+    --chart-4: oklch(0.7 0.12 50);
+    --chart-5: oklch(0.55 0.2 320);
+
+    --sidebar: oklch(0.11 0.012 255);
+    --sidebar-foreground: oklch(0.97 0.004 255);
+    --sidebar-primary: oklch(0.723 0.19 145);
+    --sidebar-primary-foreground: oklch(0.09 0.012 255);
+    --sidebar-accent: oklch(0.20 0.012 255);
+    --sidebar-accent-foreground: oklch(0.97 0.004 255);
+    --sidebar-border: oklch(0.24 0.012 255);
+    --sidebar-ring: oklch(0.723 0.19 145);
+  }
+
+  .light {
+    --background: oklch(0.99 0.002 255);
+    --foreground: oklch(0.14 0.01 255);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.14 0.01 255);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.14 0.01 255);
+    --primary: oklch(0.55 0.19 145);
+    --primary-foreground: oklch(0.99 0.002 255);
+    --secondary: oklch(0.94 0.006 255);
+    --secondary-foreground: oklch(0.2 0.01 255);
+    --muted: oklch(0.94 0.006 255);
+    --muted-foreground: oklch(0.46 0.01 255);
+    --accent: oklch(0.94 0.006 255);
+    --accent-foreground: oklch(0.2 0.01 255);
+    --destructive: oklch(0.578 0.245 27.325);
+    --destructive-foreground: oklch(0.99 0.002 255);
+    --border: oklch(0.88 0.006 255);
+    --input: oklch(0.94 0.006 255);
+    --ring: oklch(0.55 0.19 145);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+
+  html {
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+
+  .font-mono,
+  code,
+  pre,
+  [class*="font-mono"] {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Override Clerk's default fixed width for the login card */
+.cl-rootBox,
+.cl-cardBox,
+.cl-card {
+  width: 100% !important;
+}
