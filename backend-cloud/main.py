@@ -1,34 +1,65 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-import os
-from database import engine
-from models import Base
 from sqlalchemy.orm import Session
-from database import get_db
-from models import Analysis
+
+from database import engine, get_db
+from models import Base, Analysis
 from schemas import HistoryCreate
+import hashlib
+
 
 app = FastAPI()
+
+# Create tables if they don't exist
 Base.metadata.create_all(bind=engine)
-security = HTTPBearer()
 
-def verify_clerk_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+security = HTTPBearer(auto_error=False)
+
+
+# ---------------- AUTH (DEV MODE) ----------------
+def verify_clerk_token(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
+    """
+    Development authentication.
+
+    If no Clerk token is supplied, use a deterministic
+    development user.
+
+    If a token is supplied, derive a unique user id from it.
+    """
+
+    if not credentials or not credentials.credentials:
+        return {
+            "user_id": "dev_local_user"
+        }
+
     token = credentials.credentials
-    # Placeholder for Clerk JWT verification
-    # In production, use python-jose to decode and verify against Clerk JWKS
-    if not token:
-        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-    return {"user_id": "placeholder_user_id"}
 
+    user_hash = hashlib.sha256(
+        token.encode()
+    ).hexdigest()[:16]
+
+    return {
+        "user_id": f"dev_{user_hash}"
+    }
+
+
+# ---------------- ROOT ----------------
 @app.get("/")
 def read_root():
-    return {"service": "graphlens-cloud-api", "status": "running"}
+    return {
+        "service": "graphlens-cloud-api",
+        "status": "running",
+    }
 
+
+# ---------------- SAVE HISTORY ----------------
 @app.post("/api/history")
-def save_history(
+def create_history(
     data: HistoryCreate,
     user: dict = Depends(verify_clerk_token),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     analysis = Analysis(
         user_id=user["user_id"],
@@ -46,33 +77,42 @@ def save_history(
 
     return {
         "status": "success",
-        "id": str(analysis.id)
+        "id": str(analysis.id),
     }
 
+
+# ---------------- GET HISTORY ----------------
 @app.get("/api/history")
-def get_history(
+def read_history(
+    repo: str,
     user: dict = Depends(verify_clerk_token),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    rows = (
+    history = (
         db.query(Analysis)
-        .filter(Analysis.user_id == user["user_id"])
+        .filter(
+            Analysis.user_id == user["user_id"],
+            Analysis.repo == repo,
+        )
         .order_by(Analysis.analyzed_at.desc())
-        .all()
+        .first()
     )
 
+    if history is None:
+        return {
+            "history": None
+        }
+
     return {
-        "status": "success",
-        "history": [
-            {
-                "id": str(r.id),
-                "repo": r.repo,
-                "type": r.type,
-                "language": r.language,
-                "dep_count": r.dep_count,
-                "circular_count": r.circular_count,
-                "analyzed_at": r.analyzed_at,
-            }
-            for r in rows
-        ]
+        "history": {
+            "graph": history.graph,
+            "meta": {
+                "repo": history.repo,
+                "type": history.type,
+                "language": history.language,
+                "dep_count": history.dep_count,
+                "circular_count": history.circular_count,
+                "analyzed_at": history.analyzed_at,
+            },
+        }
     }

@@ -6,6 +6,6 @@ class HistoryCreate(BaseModel):
     repo: str
     type: str
     language: str
-    graph: Dict[str, Any]
+    graph: Dict
     dep_count: int
     circular_count: int = 0
