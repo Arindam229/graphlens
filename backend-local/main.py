@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+
 from analyzer import (
     analyze_local_repo,
     analyze_github_repo,

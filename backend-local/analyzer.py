@@ -1,12 +1,12 @@
 from detector import detect_dependency_file
 from github import parse_github_url, find_dependency_file
 from cycle_detector import detect_cycles
-import os
 
 from scanner import scan_repo
 from metrics import count_loc
 from import_parser import extract_imports
 from resolver import resolve_import
+from github_traversal import traverse_repo
 
 from parsers import (
     parse_node,
@@ -27,16 +27,16 @@ PARSERS = {
 # LANGUAGE DETECTION
 # -----------------------------
 def detect_language(file_name: str):
-    # FIX: Mapped exactly to PARSERS keys and added missing Go/Rust support
+
     if file_name.endswith((".ts", ".js", ".tsx", ".jsx")):
-        return "node" 
+        return "ts"   # FIXED
 
     if file_name.endswith(".py"):
         return "python"
-        
+
     if file_name.endswith(".go"):
         return "go"
-        
+
     if file_name.endswith(".rs"):
         return "rust"
 
@@ -53,13 +53,11 @@ def build_file_graph(files):
     total_loc = 0
 
     for f in files:
-        # FIX: Added try/except. Fake remote paths (like those from GitHub) 
-        # will cause count_loc to crash if we don't catch the error.
         try:
             loc = count_loc(f["path"])
         except Exception:
             loc = 0
-            
+
         total_loc += loc
 
         nodes.append({
@@ -70,9 +68,8 @@ def build_file_graph(files):
         })
 
     for f in files:
+
         try:
-            # Note: This will silently fail and "continue" for the fake GitHub files, 
-            # which is exactly what we want until a remote file downloader is built.
             with open(f["path"], "r", encoding="utf-8") as file:
                 content = file.read()
 
@@ -111,7 +108,9 @@ def build_file_graph(files):
 def analyze_local_repo(repo_path: str):
 
     files = scan_repo(repo_path)
+
     graph = build_file_graph(files)
+
     cycles = detect_cycles(graph["nodes"], graph["edges"])
 
     return {
@@ -141,27 +140,18 @@ def analyze_github_repo(url: str, token: str = None):
             "code": "INVALID_GITHUB_URL",
         }
 
-    dep = find_dependency_file(owner, repo, token)
+    files = traverse_repo(owner, repo, token)
 
-    if isinstance(dep, dict) and dep.get("status") == "error":
-        return dep
-
-    if dep is None:
+    if not files:
         return {
             "status": "error",
-            "code": "NO_DEP_FILE",
+            "code": "EMPTY_REPO",
+            "message": "No supported code files found"
         }
 
-    # ⚠️ TEMP: still single-file analysis (upgrade later)
-    # The try/catch blocks in build_file_graph now ensure this 
-    # fake path won't crash the entire program.
-    fake_files = [{
-        "path": "/github/" + dep["filename"],
-        "relative": dep["filename"],
-        "name": dep["filename"]
-    }]
+    # DIRECT USE (important fix)
+    graph = build_file_graph(files)
 
-    graph = build_file_graph(fake_files)
     cycles = detect_cycles(graph["nodes"], graph["edges"])
 
     return {
@@ -173,8 +163,7 @@ def analyze_github_repo(url: str, token: str = None):
         "meta": {
             **graph["meta"],
             "repo": url,
-            "language": dep["language"],
-            "source": "github"
+            "source": "github_full_traversal"
         },
         "cycles": cycles
     }
